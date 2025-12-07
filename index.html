@@ -542,22 +542,65 @@
         }
 
         @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+
             .chats-list {
                 width: 100%;
             }
             
-            .chat-area {
+            .chats-list.hidden {
                 display: none;
             }
             
-            .chat-area.active {
+            .chat-area {
+                display: none;
+                width: 100%;
+            }
+            
+            .chat-area.mobile-active {
                 display: flex;
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                z-index: 100;
+            }
+
+            .chat-header {
+                position: relative;
+            }
+
+            .back-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                background: transparent;
+                border: none;
+                color: #111;
+                font-size: 24px;
+                cursor: pointer;
+                margin-left: 10px;
+            }
+
+            .recording-ui {
+                left: 10px;
+                right: 10px;
+                bottom: 65px;
+            }
+
+            .message-bubble {
+                max-width: 80%;
+            }
+        }
+
+        .back-btn {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .back-btn {
+                display: flex;
             }
         }
     </style>
@@ -1003,9 +1046,16 @@
             activeChat = chat;
             renderChats();
             
+            // للهاتف: إخفاء قائمة الدردشات وإظهار الدردشة
+            if (window.innerWidth <= 768) {
+                document.querySelector('.chats-list').classList.add('hidden');
+                document.getElementById('chatArea').classList.add('mobile-active');
+            }
+            
             const chatArea = document.getElementById('chatArea');
             chatArea.innerHTML = `
                 <div class="chat-header">
+                    <button class="back-btn" onclick="backToChats()">←</button>
                     <div class="chat-header-avatar">${chat.avatar}</div>
                     <div class="chat-header-info">
                         <h3>${chat.name}</h3>
@@ -1041,6 +1091,14 @@
                     sendMessage();
                 }
             });
+        }
+
+        function backToChats() {
+            if (window.innerWidth <= 768) {
+                document.querySelector('.chats-list').classList.remove('hidden');
+                document.getElementById('chatArea').classList.remove('mobile-active');
+                stopPolling();
+            }
         }
 
         async function selectImage() {
