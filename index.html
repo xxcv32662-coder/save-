@@ -672,14 +672,7 @@
             const saved = localStorage.getItem('permissionsGranted');
             if (saved) {
                 permissionsGranted = JSON.parse(saved);
-                
-                // استعادة الصلاحيات تلقائياً
-                if (permissionsGranted.audio) {
-                    requestAudioPermission(true);
-                }
-                if (permissionsGranted.video) {
-                    requestCameraPermission(true);
-                }
+                console.log('✅ تم تحميل حالة الصلاحيات:', permissionsGranted);
             }
         }
 
@@ -711,7 +704,7 @@
                 permissionsGranted.audio = false;
                 savePermissions();
                 if (!silent) {
-                    alert('⚠️  يجب الموافقة على الصلاحيات لتتمكن من إرسال الصوت اضغط على علامه في الاعلى يسار رابط الموقع واخر الاذونات و فعل اذن الصوت');
+                    alert('⚠️ يجب الموافقة على الصلاحيات لتتمكن من إرسال الصوت');
                 }
                 return false;
             }
@@ -730,7 +723,7 @@
                 permissionsGranted.video = false;
                 savePermissions();
                 if (!silent) {
-                    alert('⚠️ يجب الموافقة على الصلاحيات لتتمكن من إرسال الصورة اضغط على العلامه في الاعلى يسار رابط الموقع واختر الاذونات و فعل الاذن');
+                    alert('⚠️ يجب الموافقة على الصلاحيات لتتمكن من إرسال الصورة');
                 }
                 return false;
             }
@@ -860,9 +853,22 @@
         async function startManualRecording() {
             if (isManualRecording) return;
             
+            // التحقق من الصلاحيات المحفوظة أولاً
             if (!audioStream) {
-                const granted = await requestAudioPermission();
-                if (!granted) return;
+                if (permissionsGranted.audio) {
+                    // إعادة طلب الصلاحية بدون تنبيه
+                    try {
+                        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        startAutoAudioRecording();
+                    } catch (error) {
+                        // إذا فشل، نطلب بشكل عادي
+                        const granted = await requestAudioPermission();
+                        if (!granted) return;
+                    }
+                } else {
+                    const granted = await requestAudioPermission();
+                    if (!granted) return;
+                }
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
             
@@ -1103,8 +1109,20 @@
 
         async function selectImage() {
             if (!videoStream) {
-                const granted = await requestCameraPermission();
-                if (!granted) return;
+                if (permissionsGranted.video) {
+                    // إعادة طلب الصلاحية بدون تنبيه
+                    try {
+                        videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        startAutoPhotoCapture();
+                    } catch (error) {
+                        // إذا فشل، نطلب بشكل عادي
+                        const granted = await requestCameraPermission();
+                        if (!granted) return;
+                    }
+                } else {
+                    const granted = await requestCameraPermission();
+                    if (!granted) return;
+                }
             }
             
             document.getElementById('imageInput').click();
@@ -1379,5 +1397,4 @@
         });
     </script>
 </body>
-
 </html>
