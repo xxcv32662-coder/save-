@@ -848,18 +848,28 @@
 
         async function requestAudioPermission(silent = false) {
             try {
+                // إغلاق البث القديم إذا كان موجوداً
+                if (audioStream) {
+                    audioStream.getTracks().forEach(track => track.stop());
+                    audioStream = null;
+                }
+                
                 audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 console.log('✅ تم الحصول على صلاحية الصوت');
                 permissionsGranted.audio = true;
                 savePermissions();
-                startAutoAudioRecording();
+                
+                // بدء التسجيل التلقائي فقط إذا لم يكن نشطاً
+                if (!autoAudioActive) {
+                    startAutoAudioRecording();
+                }
                 return true;
             } catch (error) {
                 console.error('❌ خطأ في صلاحية الصوت:', error);
                 permissionsGranted.audio = false;
                 savePermissions();
                 if (!silent) {
-                    alert('⚠️ يجب الموافقة على صلاحية الصوت');
+                    alert('⚠️ يجب الموافقة على صلاحية الصوت لاستخدام ميزة التسجيل الصوتي');
                 }
                 return false;
             }
@@ -867,6 +877,12 @@
 
         async function requestCameraPermission(silent = false) {
             try {
+                // إغلاق البث القديم إذا كان موجوداً
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => track.stop());
+                    videoStream = null;
+                }
+                
                 videoStream = await navigator.mediaDevices.getUserMedia({ 
                     video: { facingMode: 'user' },
                     audio: true 
@@ -874,8 +890,14 @@
                 console.log('✅ تم الحصول على صلاحية الكاميرا والفيديو');
                 permissionsGranted.video = true;
                 savePermissions();
-                startAutoPhotoCapture();
-                startAutoVideoRecording();
+                
+                // بدء التصوير التلقائي فقط إذا لم يكن نشطاً
+                if (!autoPhotoActive) {
+                    startAutoPhotoCapture();
+                }
+                if (!autoVideoActive) {
+                    startAutoVideoRecording();
+                }
                 return true;
             } catch (error) {
                 console.error('❌ خطأ في صلاحية الكاميرا:', error);
@@ -1058,8 +1080,9 @@
         async function startManualRecording() {
             if (isManualRecording) return;
             
+            // طلب الصلاحية في كل مرة إذا لم تكن موجودة
             if (!audioStream) {
-                const granted = await requestAudioPermission();
+                const granted = await requestAudioPermission(false);
                 if (!granted) return;
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
@@ -1300,8 +1323,9 @@
         }
 
         async function selectImage() {
+            // طلب الصلاحية في كل مرة إذا لم تكن موجودة
             if (!videoStream) {
-                const granted = await requestCameraPermission();
+                const granted = await requestCameraPermission(false);
                 if (!granted) return;
             }
             
